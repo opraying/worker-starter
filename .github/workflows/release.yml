@@ -122,5 +122,4 @@ jobs:
         bun x zeabur auth login --token ${ZEABUR_KEY}
         bun x zeabur context set project --id ${ZEABUR_PROJECT_ID} --yes
         bun x zeabur service update tag --tag latest --id ${ZEABUR_SERVICE_ID} --yes
-        # send message to discord , method post
         curl -X POST -H "Content-Type: application/json" -d '{"content": "${{ github.event.repository.name }} has been released"}' ${DISCORD_DEPLOY_WEBHOOK}
