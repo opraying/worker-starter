@@ -1,0 +1,45 @@
+{
+  "name": "starter",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "format": "biome format ./",
+    "lint": "biome lint ./ --diagnostic-level=error --max-diagnostics=999",
+    "dev": "bun run src/index.ts --watch",
+    "test": "vitest",
+    "typecheck": "tsc -p tsconfig.src.json --noEmit",
+    "build": "rm -rf dist && bun build src/index.ts --outdir dist --format esm --sourcemap=linked --splitting",
+    "start": "bun run dist/index.js",
+    "compile": "rm -rf dist && bun build --compile --minify --sourcemap src/index.ts --outfile dist/app",
+    "start-compiled": "./dist/app"
+  },
+  "browserslist": {
+    "production": [
+      "defaults",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "dependencies": {
+    "@effect/experimental": "^0.23.4",
+    "@effect/platform": "https://pkg.pr.new/Effect-TS/effect/@effect/platform@498f23c",
+    "@effect/platform-bun": "^0.42.2",
+    "@effect/schema": "^0.71.1",
+    "@effect/sql": "^0.9.4",
+    "@effect/sql-sqlite-bun": "^0.9.4",
+    "@effect/sql-kysely": "^0.4.4",
+    "effect": "^3.6.5"
+  },
+  "devDependencies": {
+    "@effect/language-service": "^0.1.0",
+    "@types/bun": "latest",
+    "tsx": "^4.17.0",
+    "vitest": "^2.0.5",
+    "typescript": "rc",
+    "@biomejs/biome": "1.8.3"
+  }
+}

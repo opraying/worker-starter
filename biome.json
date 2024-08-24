@@ -1,0 +1,64 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+  "organizeImports": {
+    "enabled": true
+  },
+  "javascript": {
+    "formatter": {
+      "semicolons": "asNeeded"
+    },
+    "jsxRuntime": "transparent"
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "complexity": {
+        "noForEach": "off",
+        "noBannedTypes": "off",
+        "noStaticOnlyClass": "off"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "off"
+      },
+      "a11y": {
+        "noSvgWithoutTitle": "off",
+        "useKeyWithClickEvents": "off",
+        "useAnchorContent": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off",
+        "noEmptyInterface": "off",
+        "noShadowRestrictedNames": "off",
+        "noConfusingVoidType": "off"
+      },
+      "correctness": {
+        "useYield": "off"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": false,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 120,
+    "lineEnding": "lf"
+  },
+  "files": {
+    "ignore": [
+      ".vscode",
+      "**/build/**",
+      "**/dist/**",
+      "**/node_modules/**",
+      "__test__/**/*.json",
+      "**/coverage/**",
+      "**/fixtures/**/*.json",
+      "**/fixtures/**/*.js"
+    ]
+  },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git"
+  }
+}
