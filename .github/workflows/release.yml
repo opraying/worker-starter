@@ -10,6 +10,9 @@ permissions:
   contents: read
   packages: write
 
+env:
+  ZEABUR_SERVICE_ID: 66c95f1ceff984d87b2c17c4
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -109,3 +112,13 @@ jobs:
           } catch (error) {
             core.setFailed(`Error: ${error.message}`);
           }
+
+    - name: Update Zeabur Service
+      env:
+        ZEABUR_KEY: ${{ secrets.ZEABUR_KEY }}
+        DISCORD_DEPLOY_WEBHOOK: ${{ secrets.DISCORD_DEPLOY_WEBHOOK }}
+      run: |
+        bun x zeabur auth login --token ${ZEABUR_KEY}
+        bun x zeabur service update tag latest --id ${ZEABUR_SERVICE_ID}
+        # send message to discord , method post
+        curl -X POST -H "Content-Type: application/json" -d '{"content": "${{ github.event.repository.name }} has been released"}' ${DISCORD_DEPLOY_WEBHOOK}
