@@ -15,7 +15,7 @@ env:
   ZEABUR_SERVICE_ID: 66c95f1ceff984d87b2c17c4
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
 
     steps:
@@ -119,7 +119,7 @@ jobs:
         ZEABUR_KEY: ${{ secrets.ZEABUR_KEY }}
         DISCORD_DEPLOY_WEBHOOK: ${{ secrets.DISCORD_DEPLOY_WEBHOOK }}
       run: |
-        bun x zeabur auth login --token ${ZEABUR_KEY} --yes
+        bun x zeabur auth login --token ${ZEABUR_KEY}
         bun x zeabur context set project --id ${ZEABUR_PROJECT_ID} --yes
         bun x zeabur service update tag --tag latest --id ${ZEABUR_SERVICE_ID} --yes
         # send message to discord , method post
