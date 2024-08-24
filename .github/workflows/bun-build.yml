@@ -13,12 +13,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-  - uses: actions/cache@v4
-    with:
-      path: ~/.bun/install/cache
-      key: ${{ runner.os }}-${{ matrix.bun }}-bun-${{ hashFiles('**/bun.lockb') }}
-      restore-keys: |
-        ${{ runner.os }}-${{ matrix.bun }}-bun-
+    - uses: actions/cache@v4
+      with:
+        path: ~/.bun/install/cache
+        key: ${{ runner.os }}-${{ matrix.bun }}-bun-${{ hashFiles('**/bun.lockb') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ matrix.bun }}-bun-
 
     - name: Use Bun
       uses: oven-sh/setup-bun@v2
@@ -27,6 +27,12 @@ jobs:
 
     - name: Install dependencies
       run: bun install
+
+    - name: Lint
+      run: bun run lint
+
+    - name: Type check
+      run: bun run typecheck
 
     - name: Test compile
       run: bun run compile

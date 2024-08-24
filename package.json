@@ -2,6 +2,7 @@
   "name": "starter",
   "module": "src/index.ts",
   "type": "module",
+  "packageManager": "bun@1.1.24",
   "scripts": {
     "format": "biome format ./",
     "lint": "biome lint ./ --diagnostic-level=error --max-diagnostics=999",
@@ -14,15 +15,8 @@
     "start-compiled": "./dist/app"
   },
   "browserslist": {
-    "production": [
-      "defaults",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "production": ["defaults", "not op_mini all"],
+    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
   },
   "dependencies": {
     "@effect/experimental": "^0.23.4",
@@ -35,11 +29,12 @@
     "effect": "^3.6.5"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.8.3",
     "@effect/language-service": "^0.1.0",
     "@types/bun": "latest",
+    "lefthook": "^1.7.14",
     "tsx": "^4.17.0",
-    "vitest": "^2.0.5",
     "typescript": "rc",
-    "@biomejs/biome": "1.8.3"
+    "vitest": "^2.0.5"
   }
 }
