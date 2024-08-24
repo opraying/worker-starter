@@ -7,7 +7,7 @@
     "module": "Preserve",
     "tsBuildInfoFile": "./tsconfig.test.tsbuildinfo",
     "paths": {
-      "@/*": ["src/*.js"]
+      "@/*": ["src/*.ts"]
     }
   },
   "include": ["test/**/*"],

@@ -4,6 +4,7 @@
     "outDir": "dist",
     "rootDir": "src",
     "module": "Preserve",
+    "types": ["bun-types"],
     "tsBuildInfoFile": "./tsconfig.src.tsbuildinfo"
   },
   "include": ["src/**/*"]

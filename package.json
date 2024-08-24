@@ -9,10 +9,8 @@
     "dev": "bun run src/index.ts --watch",
     "test": "vitest",
     "typecheck": "tsc -p tsconfig.src.json --noEmit",
-    "build": "rm -rf dist && bun build src/index.ts --outdir dist --format esm --sourcemap=linked --splitting",
-    "start": "bun run dist/index.js",
-    "compile": "rm -rf dist && bun build --compile --minify --sourcemap src/index.ts --outfile dist/app",
-    "start-compiled": "./dist/app"
+    "build": "rm -rf dist && bun build src/index.ts --outdir=dist --sourcemap=linked --format=esm --target=bun --minify",
+    "start": "bun run dist/index.js"
   },
   "browserslist": {
     "production": ["defaults", "not op_mini all"],

@@ -17,7 +17,6 @@ const LoggerLive = Logger.replace(
 const Live = Layer.mergeAll(Layer.empty).pipe(
   Layer.provideMerge(
     BunHttpServer.layer({
-      development: false,
       hostname: "0.0.0.0",
       port: process.env.PORT ?? 4000,
     }),
