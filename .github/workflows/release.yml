@@ -159,7 +159,7 @@ jobs:
             repo: context.repo.repo,
             deployment_id: ${{ steps.deployment.outputs.result }},
             state: status,
-            environment_url: ${{ env.ZEABUR_URL }},
+            environment_url: "${{ env.ZEABUR_URL }}",
             auto_inactive: true
           });
           await fetch(DISCORD_DEPLOY_WEBHOOK, {
