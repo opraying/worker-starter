@@ -162,7 +162,7 @@ jobs:
             environment_url: "${{ env.ZEABUR_URL }}",
             auto_inactive: true
           });
-          await fetch(DISCORD_DEPLOY_WEBHOOK, {
+          await fetch(${{ secrets.DISCORD_DEPLOY_WEBHOOK }}, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
