@@ -60,13 +60,15 @@ jobs:
       run: |
         REPO="${{ github.repository_owner }}/${{ github.event.repository.name }}"
         TOKEN="${{ secrets.GITHUB_TOKEN }}"
-        LATEST_DIGEST=$(curl -s -H "Authorization: Bearer $TOKEN" \
-          "https://api.github.com/user/packages/container/$REPO/versions" | \
-          jq -r '.[] | select(.metadata.container.tags[] | contains("latest")) | .id')
-        if [ ! -z "$LATEST_DIGEST" ]; then
+        PACKAGE_NAME=$(echo $REPO | tr '[:upper:]' '[:lower:]')
+        VERSIONS=$(curl -s -H "Authorization: Bearer $TOKEN" \
+          "https://api.github.com/user/packages/container/$PACKAGE_NAME/versions")
+        echo "$VERSIONS" | jq .
+        LATEST_ID=$(echo "$VERSIONS" | jq -r '.[] | select(.metadata.container.tags | index("latest")) | .id')
+        if [ ! -z "$LATEST_ID" ]; then
           curl -X DELETE -H "Authorization: Bearer $TOKEN" \
-            "https://api.github.com/user/packages/container/$REPO/versions/$LATEST_DIGEST"
-          echo "Deleted old latest image with digest: $LATEST_DIGEST"
+            "https://api.github.com/user/packages/container/$PACKAGE_NAME/versions/$LATEST_ID"
+          echo "Deleted old latest image with ID: $LATEST_ID"
         else
           echo "No old latest image found to delete"
         fi
