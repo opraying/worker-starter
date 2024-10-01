@@ -1,8 +1,11 @@
-import * as Api from "@effect/platform/Api"
-import { appApi, otelApi } from "./delcare"
+import * as HttpApi from "@effect/platform/HttpApi"
+import * as OpenApi from "@effect/platform/OpenApi"
+import { AppApi } from "./delcare"
 
-export const api = Api.empty.pipe(
-  //
-  Api.addGroup(otelApi),
-  Api.addGroup(appApi),
-)
+export class MyHttpApi extends HttpApi.empty.pipe(
+  HttpApi.addGroup(AppApi),
+  OpenApi.annotate({
+    title: "Public Api",
+    description: "Public Api"
+  })
+) {}

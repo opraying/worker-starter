@@ -16,9 +16,6 @@ concurrency:
   cancel-in-progress: true
   
 env:
-  ZEABUR_PROJECT_ID: 66c8a3c25021db4b95b4cefa
-  ZEABUR_SERVICE_ID: 66c95f1ceff984d87b2c17c4
-  ZEABUR_URL: https://test-bun.opraying.com
 
 jobs:
   release:
@@ -45,129 +42,33 @@ jobs:
     - name: Lint
       run: bun run lint
 
+    - name: Madge
+      run: bun run madge
+
     - name: Type check
       run: bun run typecheck
 
-    - name: Build
-      run: bun run build
-
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v3
+    - name: Deploy
+      id: deploy
+      uses: cloudflare/wrangler-action@v3
       with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: true
-        tags: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
-        file: ./Dockerfile
-
-    - name: Create GitHub Deployment
-      id: deployment
-      uses: actions/github-script@v7
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const deployment = await github.rest.repos.createDeployment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: context.sha,
-            environment: "production",
-            auto_merge: false,
-            required_contexts: []
-          });
-          return deployment.data.id;
-
-    - name: Update Zeabur Service
-      id: zeabur-deploy
-      env:
-        ZEABUR_KEY: ${{ secrets.ZEABUR_KEY }}
-        DISCORD_DEPLOY_WEBHOOK: ${{ secrets.DISCORD_DEPLOY_WEBHOOK }}
-      run: |
-        bun x zeabur auth login --token ${ZEABUR_KEY}
-        bun x zeabur context set project --id ${ZEABUR_PROJECT_ID} --yes
-        bun x zeabur service update tag --tag latest --id ${ZEABUR_SERVICE_ID} --yes
-
-    - name: Delete old images
-      uses: actions/github-script@v7
-      if: ${{ steps.zeabur-deploy.outcome == 'success' }}
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const owner = context.repo.owner;
-          const repo = context.repo.repo;
-          const packageName = repo.toLowerCase();
-
-          core.info('Fetching package versions...');
-          try {
-            const { data: versions } = await github.rest.packages.getAllPackageVersionsForPackageOwnedByOrg({
-              package_type: 'container',
-              package_name: packageName,
-              org: owner
-            });
-
-            // Find the latest version (should be the one we just pushed)
-            const latestVersion = versions.find(v => v.metadata.container.tags.includes('latest'));
-
-            if (!latestVersion) {
-              core.setFailed('Could not find the latest version');
-              return;
-            }
-
-            // Filter out versions that are not the latest
-            const versionsToDelete = versions.filter(v => v.id !== latestVersion.id);
-
-            if (versionsToDelete.length === 0) {
-              core.info('No old images to delete');
-              return;
-            }
-
-            // Delete old versions
-            for (const version of versionsToDelete) {
-              core.info(`Deleting image with ID: ${version.id}`);
-              try {
-                await github.rest.packages.deletePackageVersionForOrg({
-                  package_type: 'container',
-                  package_name: packageName,
-                  org: owner,
-                  package_version_id: version.id
-                });
-                core.info(`Successfully deleted image with ID: ${version.id}`);
-              } catch (deleteError) {
-                core.warning(`Failed to delete image with ID: ${version.id}. Error: ${deleteError.message}`);
-              }
-            }
-
-            core.info('Finished deleting old images');
-          } catch (error) {
-            core.setFailed(`Error: ${error.message}`);
-          }
-
-    - name: Update Deployment Status
+    - name: Send Deployment Status
       if: always()
       uses: actions/github-script@v7
+      env:
+        DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          const status = '${{ steps.zeabur-deploy.outcome }}' === 'success' ? 'success' : 'failure';
-          await github.rest.repos.createDeploymentStatus({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            deployment_id: ${{ steps.deployment.outputs.result }},
-            state: status,
-            environment_url: "${{ env.ZEABUR_URL }}",
-            auto_inactive: true
-          });
+          const status = '${{ steps.deploy.outcome }}' === 'success' ? 'success' : 'failure';
           await fetch("${{ secrets.DISCORD_DEPLOY_WEBHOOK }}", {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({ 
-              content: status === 'failure' ? '❌ ${{ github.event.repository.name }} deployment failed' : '🚀 ${{ github.event.repository.name }} has been released'
+              content: status === 'failure' ? '❌ ${{ github.event.repository.name }} deployment failed' : '🚀 ${{ github.event.repository.name }} has been released. ${{ env.DEPLOYMENT_URL }}'
             })
           });

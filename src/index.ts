@@ -1,31 +1,34 @@
-import * as BunHttpServer from "@effect/platform-bun/BunHttpServer"
-import * as BunRuntime from "@effect/platform-bun/BunRuntime"
-import * as ApiBuilder from "@effect/platform/ApiBuilder"
+import * as Etag from "@effect/platform/Etag"
+import * as FileSystem from "@effect/platform/FileSystem"
+import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder"
 import * as HttpMiddleware from "@effect/platform/HttpMiddleware"
+import * as HttpPlatform from "@effect/platform/HttpPlatform"
+import * as Path from "@effect/platform/Path"
+import { pipe } from "effect"
 import * as Layer from "effect/Layer"
 import * as Logger from "effect/Logger"
-import { api } from "./api"
-import { HttpAppLive, HttpOtelLive } from "./handle"
+import * as ManagedRuntime from "effect/ManagedRuntime"
+import { MyHttpApi } from "./api"
+import { HttpAppLive } from "./handle"
 
-const LoggerLive = Logger.replace(
-  Logger.defaultLogger,
-  Logger.prettyLogger({
-    formatDate: (date) => date.toLocaleString(),
-  }),
+const HttpLive = Layer.mergeAll(HttpAppLive)
+
+const Live = pipe(
+  HttpApiBuilder.Router.Live,
+  Layer.provideMerge(HttpApiBuilder.api(MyHttpApi).pipe(Layer.provide(HttpLive))),
+  Layer.provideMerge(HttpPlatform.layer),
+  Layer.provideMerge(Etag.layerWeak),
+  Layer.provideMerge(Path.layer),
+  Layer.provideMerge(FileSystem.layerNoop({})),
+  Layer.provide(Logger.pretty)
 )
 
-const Live = Layer.mergeAll(Layer.empty).pipe(
-  Layer.provideMerge(
-    BunHttpServer.layer({
-      hostname: "0.0.0.0",
-      port: process.env.PORT ?? 4000,
-    }),
-  ),
-  Layer.provide(LoggerLive),
-)
+const runtime = ManagedRuntime.make(Live)
 
-export const HttpLive = Layer.mergeAll(ApiBuilder.ApiRouter.Live, HttpOtelLive, HttpAppLive)
+const handler = HttpApiBuilder.toWebHandler(runtime, HttpMiddleware.logger)
 
-const App = ApiBuilder.serve(api, HttpMiddleware.logger).pipe(Layer.provide(HttpLive))
-
-App.pipe(Layer.provide(LoggerLive), Layer.provide(Live), Layer.launch, BunRuntime.runMain)
+export default {
+  fetch(request) {
+    return handler(request as unknown as Request)
+  }
+} satisfies ExportedHandler<Env>

@@ -1,16 +1,18 @@
-import * as ApiEndpoint from "@effect/platform/ApiEndpoint"
-import * as ApiGroup from "@effect/platform/ApiGroup"
+import * as HttpApiEndpoint from "@effect/platform/HttpApiEndpoint"
+import * as HttpApiGroup from "@effect/platform/HttpApiGroup"
+import * as OpenApi from "@effect/platform/OpenApi"
 import * as Schema from "@effect/schema/Schema"
+import { UserWithSensitive } from "./model"
 
-export const otelApi = ApiGroup.make("otel").pipe(
-  ApiGroup.add(ApiEndpoint.post("traces", "/v1/traces").pipe(ApiEndpoint.payload(Schema.Any))),
-  ApiGroup.add(ApiEndpoint.post("metrics", "/v1/metrics").pipe(ApiEndpoint.payload(Schema.Any))),
-
-  ApiGroup.prefix("/api"),
-)
-
-export const appApi = ApiGroup.make("app").pipe(
-  ApiGroup.add(ApiEndpoint.get("index", "/").pipe(ApiEndpoint.success(Schema.String))),
-  ApiGroup.add(ApiEndpoint.get("health", "/health").pipe(ApiEndpoint.success(Schema.String))),
-  ApiGroup.prefix("/api"),
-)
+export class AppApi extends HttpApiGroup.make("app").pipe(
+  HttpApiGroup.add(
+    HttpApiEndpoint.get("index", "/").pipe(HttpApiEndpoint.setSuccess(
+      UserWithSensitive
+    ))
+  ),
+  HttpApiGroup.add(HttpApiEndpoint.get("health", "/health").pipe(HttpApiEndpoint.setSuccess(Schema.String))),
+  OpenApi.annotate({
+    title: "App Api",
+    description: "App Api"
+  })
+) {}

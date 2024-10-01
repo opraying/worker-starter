@@ -1,44 +1,33 @@
-import * as ApiBuilder from "@effect/platform/ApiBuilder"
-import * as HttpBody from "@effect/platform/HttpBody"
-import * as HttpClient from "@effect/platform/HttpClient"
-import * as HttpClientRequest from "@effect/platform/HttpClientRequest"
+import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder"
+import * as DateTime from "effect/DateTime"
 import * as Effect from "effect/Effect"
-import { api } from "./api"
+import * as Redacted from "effect/Redacted"
+import { MyHttpApi } from "./api"
+import { AccessTokenString, Account, AccountId, UserId, UserWithSensitive } from "./model"
 
-export const HttpOtelLive = ApiBuilder.group(api, "otel", (handles) =>
-  Effect.gen(function* () {
-    return handles.pipe(
-      ApiBuilder.handle("traces", ({ payload }) =>
-        Effect.gen(function* () {
-          yield* HttpClientRequest.post("/v1/traces", {
-            body: HttpBody.unsafeJson(payload),
-          }).pipe(HttpClient.fetchOk, Effect.scoped, Effect.ignore)
-        }),
-      ),
-      ApiBuilder.handle("metrics", ({ payload }) =>
-        Effect.gen(function* () {
-          yield* HttpClientRequest.post("/v1/traces", {
-            body: HttpBody.unsafeJson(payload),
-          }).pipe(HttpClient.fetchOk, Effect.scoped, Effect.ignore)
-        }),
-      ),
-    )
-  }),
-)
+export const HttpAppLive = HttpApiBuilder.group(MyHttpApi, "app", (handles) =>
+  Effect.gen(function*() {
+    yield* Effect.log("Hello")
 
-export const HttpAppLive = ApiBuilder.group(api, "app", (handles) =>
-  Effect.gen(function* () {
     return handles.pipe(
-      ApiBuilder.handle("index", () =>
-        Effect.gen(function* () {
-          return "Hello, world!"
-        }),
-      ),
-      ApiBuilder.handle("health", () =>
-        Effect.gen(function* () {
-          return "ok"
-        }),
-      ),
+      HttpApiBuilder.handle("index", () =>
+        Effect.gen(function*() {
+          const createdAt = yield* DateTime.now
+          const updatedAt = yield* DateTime.now
+
+          return UserWithSensitive.make({
+            id: UserId.make(1),
+            accessToken: Redacted.make(AccessTokenString.make("123")),
+            account: Account.make({
+              id: AccountId.make(1),
+              createdAt,
+              updatedAt
+            }),
+            accountId: AccountId.make(1),
+            createdAt,
+            updatedAt
+          })
+        })),
+      HttpApiBuilder.handle("health", () => Effect.succeed("ok"))
     )
-  }),
-)
+  }))
