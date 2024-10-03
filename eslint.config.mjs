@@ -1,58 +1,57 @@
-import { fixupPluginRules } from "@eslint/compat"
-import { FlatCompat } from "@eslint/eslintrc"
-import js from "@eslint/js"
-import tsParser from "@typescript-eslint/parser"
-import deprecation from "eslint-plugin-deprecation"
-import _import from "eslint-plugin-import"
-import simpleImportSort from "eslint-plugin-simple-import-sort"
-import sortDestructureKeys from "eslint-plugin-sort-destructure-keys"
-import path from "node:path"
-import { fileURLToPath } from "node:url"
+import { fixupPluginRules } from "@eslint/compat";
+import { FlatCompat } from "@eslint/eslintrc";
+import js from "@eslint/js";
+import json from "@eslint/json";
+import markdown from "@eslint/markdown";
+import tsParser from "@typescript-eslint/parser";
+import deprecation from "eslint-plugin-deprecation";
+import _import from "eslint-plugin-import";
+import simpleImportSort from "eslint-plugin-simple-import-sort";
+import sortDestructureKeys from "eslint-plugin-sort-destructure-keys";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const compat = new FlatCompat({
   baseDirectory: __dirname,
   recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all
-})
+  allConfig: js.configs.all,
+});
 
 export default [
   {
-    ignores: ["**/dist", "**/build", "**/docs", "**/*.md"]
+    ignores: ["**/dist", "**/build", "**/docs"],
   },
   ...compat.extends(
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:@effect/recommended"
+    "plugin:@effect/recommended",
   ),
   {
+    files: ["src/**/*.{ts,tsx,js,jsx,mjs}", "test/**/*.ts"],
     plugins: {
       deprecation,
       import: fixupPluginRules(_import),
       "sort-destructure-keys": sortDestructureKeys,
-      "simple-import-sort": simpleImportSort
+      "simple-import-sort": simpleImportSort,
     },
-
     languageOptions: {
       parser: tsParser,
       ecmaVersion: 2018,
-      sourceType: "module"
+      sourceType: "module",
     },
-
     settings: {
       "import/parsers": {
-        "@typescript-eslint/parser": [".ts", ".tsx"]
+        "@typescript-eslint/parser": [".ts", ".tsx"],
       },
-
       "import/resolver": {
         typescript: {
-          alwaysTryTypes: true
-        }
-      }
+          alwaysTryTypes: true,
+        },
+      },
     },
-
     rules: {
       "no-fallthrough": "off",
       "no-irregular-whitespace": "off",
@@ -64,10 +63,11 @@ export default [
         "error",
         {
           selector: "CallExpression[callee.property.name='push'] > SpreadElement.arguments",
-          message: "Do not use spread arguments in Array.push"
-        }
+          message: "Do not use spread arguments in Array.push",
+        },
       ],
 
+      "no-console": "error",
       "no-unused-vars": "off",
       "prefer-rest-params": "off",
       "prefer-spread": "off",
@@ -84,8 +84,8 @@ export default [
         "warn",
         {
           default: "generic",
-          readonly: "generic"
-        }
+          readonly: "generic",
+        },
       ],
 
       "@typescript-eslint/member-delimiter-style": 0,
@@ -99,8 +99,8 @@ export default [
         "error",
         {
           argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_"
-        }
+          varsIgnorePattern: "^_",
+        },
       ],
 
       "@typescript-eslint/ban-ts-comment": "off",
@@ -122,16 +122,35 @@ export default [
             quoteStyle: "alwaysDouble",
             trailingCommas: "never",
             operatorPosition: "maintain",
-            "arrowFunction.useParentheses": "force"
-          }
-        }
-      ]
-    }
+            "arrowFunction.useParentheses": "force",
+          },
+        },
+      ],
+    },
   },
   {
-    files: ["src/**/*", "test/**/*"],
+    files: ["**/*.json"],
+    plugins: {
+      json,
+    },
+    language: "json/json",
+
     rules: {
-      "no-console": "error"
-    }
-  }
-]
+      "json/no-duplicate-keys": "error",
+
+      "no-irregular-whitespace": "off",
+    },
+  },
+  {
+    files: ["**/*.md"],
+    plugins: {
+      markdown,
+    },
+    language: "markdown/commonmark",
+    rules: {
+      "markdown/no-html": "error",
+
+      "no-irregular-whitespace": "off",
+    },
+  },
+];
