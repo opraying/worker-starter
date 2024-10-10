@@ -19,7 +19,6 @@ jobs:
 
       - name: actions-template-sync
         uses: AndreasAugustin/actions-template-sync@v2
-        if: github.event.repository.name != 'worker-starter'
         with:
           github_token: ${{ secrets.REPO_SYNC_TOKEN }}
           source_repo_path: opraying/worker-starter
