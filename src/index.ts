@@ -25,7 +25,6 @@ const Live = pipe(
 
 const runtime = ManagedRuntime.make(Live)
 
-
 declare global {
   // eslint-disable-next-line no-var
   var env: Env
