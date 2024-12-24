@@ -1,4 +1,4 @@
-# starter
+# worker-starter
 
 To install dependencies:
 
