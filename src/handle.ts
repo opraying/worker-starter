@@ -9,25 +9,23 @@ export const HttpAppLive = HttpApiBuilder.group(MyHttpApi, "app", (handles) =>
   Effect.gen(function*() {
     yield* Effect.log("Hello")
 
-    return handles.pipe(
-      HttpApiBuilder.handle("index", () =>
-        Effect.gen(function*() {
-          const createdAt = yield* DateTime.now
-          const updatedAt = yield* DateTime.now
+    return handles.handle("index", () =>
+      Effect.gen(function*() {
+        const createdAt = yield* DateTime.now
+        const updatedAt = yield* DateTime.now
 
-          return UserWithSensitive.make({
-            id: UserId.make(1),
-            accessToken: Redacted.make(AccessTokenString.make("123")),
-            account: Account.make({
-              id: AccountId.make(1),
-              createdAt,
-              updatedAt
-            }),
-            accountId: AccountId.make(1),
+        return UserWithSensitive.make({
+          id: UserId.make(1),
+          accessToken: Redacted.make(AccessTokenString.make("123")),
+          account: Account.make({
+            id: AccountId.make(1),
             createdAt,
             updatedAt
-          })
-        })),
-      HttpApiBuilder.handle("health", () => Effect.succeed("ok"))
-    )
+          }),
+          accountId: AccountId.make(1),
+          createdAt,
+          updatedAt
+        })
+      }))
+      .handle("health", () => Effect.succeed("ok"))
   }))
