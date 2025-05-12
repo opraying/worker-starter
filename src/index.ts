@@ -14,7 +14,9 @@ declare global {
   var env: Env
 }
 
-const HttpLive = HttpApiBuilder.api(MyHttpApi).pipe(Layer.provide([HttpAppLive]))
+const HttpLive = HttpApiBuilder.api(MyHttpApi).pipe(
+  Layer.provide([HttpAppLive])
+)
 
 const Live = pipe(
   HttpApiBuilder.Router.Live,
